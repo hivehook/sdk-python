@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=77.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hivehook-sdk"
+version = "0.1.0"
+description = "Official Hivehook Python SDK"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Hivehook"}]
+keywords = ["hivehook", "webhook", "webhooks", "graphql", "sdk"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = ["requests>=2.28.0"]
+
+[project.urls]
+Homepage = "https://hivehook.com"
+Documentation = "https://hivehook.com/docs"
+Repository = "https://github.com/hivehook/sdk-python"
+Issues = "https://github.com/hivehook/sdk-python/issues"
+
+[project.optional-dependencies]
+async = ["httpx>=0.25.0"]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.21", "httpx>=0.25.0"]
+
+[tool.setuptools.packages.find]
+include = ["hivehook*"]
+
+[tool.setuptools.package-data]
+hivehook = ["py.typed"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
