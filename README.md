@@ -2,6 +2,8 @@
 
 Official Python client for [Hivehook](https://hivehook.com), webhook infrastructure for modern teams (inbound and outbound).
 
+Latest release: **0.1.1** on [PyPI](https://pypi.org/project/hivehook-sdk/).
+
 ## Install
 
 ```bash
