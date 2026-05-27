@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Stream, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _STREAM_FIELDS = """
     id applicationId name status retentionDays createdAt
@@ -109,6 +109,9 @@ class StreamService:
         data = self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteStream", False)
 
+    def iterate(self, **filters: Any) -> Iterator[Stream]:
+        return paginate(self.list, **filters)
+
 
 class AsyncStreamService:
     def __init__(self, transport: Any):
@@ -162,3 +165,6 @@ class AsyncStreamService:
     async def delete(self, id: str) -> bool:
         data = await self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteStream", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Stream]:
+        return paginate_async(self.list, **filters)

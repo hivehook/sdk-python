@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import APIKey, APIKeyWithSecret, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _APIKEY_FIELDS = """
     id name keyPrefix scopes sourceIds
@@ -97,6 +97,9 @@ class APIKeyService:
         data = self._t.execute(_REVOKE_MUTATION, {"id": id})
         return data.get("revokeAPIKey", False)
 
+    def iterate(self, **filters: Any) -> Iterator[APIKey]:
+        return paginate(self.list, **filters)
+
 
 class AsyncAPIKeyService:
     def __init__(self, transport: Any):
@@ -139,3 +142,6 @@ class AsyncAPIKeyService:
     async def revoke(self, id: str) -> bool:
         data = await self._t.execute(_REVOKE_MUTATION, {"id": id})
         return data.get("revokeAPIKey", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[APIKey]:
+        return paginate_async(self.list, **filters)

@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from hivehook.client import HivehookClient
 from hivehook.async_client import AsyncHivehookClient
@@ -66,10 +66,13 @@ from hivehook.types import (
     FilterRule,
 )
 from hivehook.resources.portal import PortalToken
+from hivehook.resources._base import paginate, paginate_async
 
 __all__ = [
     "HivehookClient",
     "AsyncHivehookClient",
+    "paginate",
+    "paginate_async",
     "HivehookError",
     "APIError",
     "NotFoundError",

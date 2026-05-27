@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Endpoint, ListResult, RetryPolicy, OAuth2Config, OutboundDelivery, HealthConfig
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 from hivehook.resources.subscriptions import _parse_filter_config, _build_filter_config_input
 from hivehook.resources.destinations import _parse_oauth2_config, _build_oauth2_config_input, _parse_health_config, _build_health_config_input
 from hivehook.resources.outbound_deliveries import _parse_outbound_delivery
@@ -259,6 +259,9 @@ class EndpointService:
         data = self._t.execute(_SKIP_OUTBOUND_DLQ_ENTRY_MUTATION, {"id": id})
         return data.get("skipOutboundDlqEntry", False)
 
+    def iterate(self, **filters: Any) -> Iterator[Endpoint]:
+        return paginate(self.list, **filters)
+
 
 class AsyncEndpointService:
     def __init__(self, transport: Any):
@@ -378,3 +381,6 @@ class AsyncEndpointService:
     async def skip_outbound_dlq_entry(self, id: str) -> bool:
         data = await self._t.execute(_SKIP_OUTBOUND_DLQ_ENTRY_MUTATION, {"id": id})
         return data.get("skipOutboundDlqEntry", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Endpoint]:
+        return paginate_async(self.list, **filters)

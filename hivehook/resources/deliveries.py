@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Delivery, DeliveryAttempt, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _DELIVERY_FIELDS = """
     id eventId subscriptionId destinationId
@@ -91,6 +91,9 @@ class DeliveryService:
         d = data.get("delivery")
         return _parse_delivery(d) if d else None
 
+    def iterate(self, **filters: Any) -> Iterator[Delivery]:
+        return paginate(self.list, **filters)
+
 
 class AsyncDeliveryService:
     def __init__(self, transport: Any):
@@ -117,3 +120,6 @@ class AsyncDeliveryService:
         data = await self._t.execute(_GET_QUERY, {"id": id})
         d = data.get("delivery")
         return _parse_delivery(d) if d else None
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Delivery]:
+        return paginate_async(self.list, **filters)

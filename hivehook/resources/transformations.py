@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Transformation, TransformTestResult, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _TRANSFORM_FIELDS = "id name description code enabled failOpen timeoutMs createdAt updatedAt"
 
@@ -140,6 +140,9 @@ class TransformationService:
         data = self._t.execute(_TEST_MUTATION, {"input": inp})
         return _parse_test_result(data["testTransformation"])
 
+    def iterate(self, **filters: Any) -> Iterator[Transformation]:
+        return paginate(self.list, **filters)
+
 
 class AsyncTransformationService:
     def __init__(self, transport: Any):
@@ -206,3 +209,6 @@ class AsyncTransformationService:
             inp["headers"] = headers
         data = await self._t.execute(_TEST_MUTATION, {"input": inp})
         return _parse_test_result(data["testTransformation"])
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Transformation]:
+        return paginate_async(self.list, **filters)

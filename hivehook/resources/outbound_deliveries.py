@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import OutboundDelivery, OutboundDeliveryAttempt, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _DELIVERY_FIELDS = """
     id messageId endpointId
@@ -87,6 +87,9 @@ class OutboundDeliveryService:
         d = data.get("outboundDelivery")
         return _parse_outbound_delivery(d) if d else None
 
+    def iterate(self, **filters: Any) -> Iterator[OutboundDelivery]:
+        return paginate(self.list, **filters)
+
 
 class AsyncOutboundDeliveryService:
     def __init__(self, transport: Any):
@@ -112,3 +115,6 @@ class AsyncOutboundDeliveryService:
         data = await self._t.execute(_GET_QUERY, {"id": id})
         d = data.get("outboundDelivery")
         return _parse_outbound_delivery(d) if d else None
+
+    def iterate(self, **filters: Any) -> AsyncIterator[OutboundDelivery]:
+        return paginate_async(self.list, **filters)

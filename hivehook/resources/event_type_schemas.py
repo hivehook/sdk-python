@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import EventTypeSchema, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _SCHEMA_FIELDS = "id eventType description schema example createdAt updatedAt"
 
@@ -102,6 +102,9 @@ class EventTypeSchemaService:
         data = self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteEventTypeSchema", False)
 
+    def iterate(self, **filters: Any) -> Iterator[EventTypeSchema]:
+        return paginate(self.list, **filters)
+
 
 class AsyncEventTypeSchemaService:
     def __init__(self, transport: Any):
@@ -151,3 +154,6 @@ class AsyncEventTypeSchemaService:
     async def delete(self, id: str) -> bool:
         data = await self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteEventTypeSchema", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[EventTypeSchema]:
+        return paginate_async(self.list, **filters)

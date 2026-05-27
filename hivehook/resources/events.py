@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Event, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _EVENT_FIELDS = """
     id sourceId idempotencyKey eventType
@@ -66,6 +66,9 @@ class EventService:
         e = data.get("event")
         return _parse_event(e) if e else None
 
+    def iterate(self, **filters: Any) -> Iterator[Event]:
+        return paginate(self.list, **filters)
+
 
 class AsyncEventService:
     def __init__(self, transport: Any):
@@ -91,3 +94,6 @@ class AsyncEventService:
         data = await self._t.execute(_GET_QUERY, {"id": id})
         e = data.get("event")
         return _parse_event(e) if e else None
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Event]:
+        return paginate_async(self.list, **filters)

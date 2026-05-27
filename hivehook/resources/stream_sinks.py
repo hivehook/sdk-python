@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import StreamSink, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _SINK_FIELDS = """
     id streamId name sinkType config batchSize flushInterval cursorSequence status lastFlushedAt createdAt
@@ -117,6 +117,9 @@ class StreamSinkService:
         data = self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteStreamSink", False)
 
+    def iterate(self, stream_id: str, **filters: Any) -> Iterator[StreamSink]:
+        return paginate(lambda **kw: self.list(stream_id, **kw), **filters)
+
 
 class AsyncStreamSinkService:
     def __init__(self, transport: Any):
@@ -173,3 +176,6 @@ class AsyncStreamSinkService:
     async def delete(self, id: str) -> bool:
         data = await self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteStreamSink", False)
+
+    def iterate(self, stream_id: str, **filters: Any) -> AsyncIterator[StreamSink]:
+        return paginate_async(lambda **kw: self.list(stream_id, **kw), **filters)

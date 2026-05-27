@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import AlertRule, EmailAlertConfig, SlackAlertConfig, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _ALERT_FIELDS = "id name conditionType threshold webhookUrl channel emailConfig { to subjectTemplate } slackConfig { webhookUrl channel } cooldown enabled createdAt"
 
@@ -148,6 +148,9 @@ class AlertRuleService:
         data = self._t.execute(_TEST_MUTATION, {"id": id})
         return data.get("testAlertRule", False)
 
+    def iterate(self, **filters: Any) -> Iterator[AlertRule]:
+        return paginate(self.list, **filters)
+
 
 class AsyncAlertRuleService:
     def __init__(self, transport: Any):
@@ -213,3 +216,6 @@ class AsyncAlertRuleService:
     async def test(self, id: str) -> bool:
         data = await self._t.execute(_TEST_MUTATION, {"id": id})
         return data.get("testAlertRule", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[AlertRule]:
+        return paginate_async(self.list, **filters)

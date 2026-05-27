@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Organization, OTLPConfig, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _ORG_FIELDS = """
     id name slug ssoEnabled ssoProvider
@@ -220,6 +220,9 @@ class OrganizationService:
         data = self._t.execute(_DISABLE_OTLP_MUTATION, {"organizationId": organization_id})
         return _parse_organization(data["disableOTLP"])
 
+    def iterate(self, **filters: Any) -> Iterator[Organization]:
+        return paginate(self.list, **filters)
+
 
 class AsyncOrganizationService:
     def __init__(self, transport: Any):
@@ -326,3 +329,6 @@ class AsyncOrganizationService:
     async def disable_otlp(self, organization_id: str) -> Organization:
         data = await self._t.execute(_DISABLE_OTLP_MUTATION, {"organizationId": organization_id})
         return _parse_organization(data["disableOTLP"])
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Organization]:
+        return paginate_async(self.list, **filters)

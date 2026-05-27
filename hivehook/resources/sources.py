@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Source, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _SOURCE_FIELDS = """
     id name slug providerType
@@ -140,6 +140,9 @@ class SourceService:
         data = self._t.execute(_CLEAR_SECONDARY_MUTATION, {"id": id})
         return _parse_source(data["clearSourceSecondarySecret"])
 
+    def iterate(self, **filters: Any) -> Iterator[Source]:
+        return paginate(self.list, **filters)
+
 
 class AsyncSourceService:
     def __init__(self, transport: Any):
@@ -207,3 +210,6 @@ class AsyncSourceService:
     async def clear_secondary_secret(self, id: str) -> Source:
         data = await self._t.execute(_CLEAR_SECONDARY_MUTATION, {"id": id})
         return _parse_source(data["clearSourceSecondarySecret"])
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Source]:
+        return paginate_async(self.list, **filters)

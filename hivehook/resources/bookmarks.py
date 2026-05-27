@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Bookmark, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _BOOKMARK_FIELDS = "id eventId name notes createdAt"
 
@@ -75,6 +75,9 @@ class BookmarkService:
         data = self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteBookmark", False)
 
+    def iterate(self, **filters: Any) -> Iterator[Bookmark]:
+        return paginate(self.list, **filters)
+
 
 class AsyncBookmarkService:
     def __init__(self, transport: Any):
@@ -105,3 +108,6 @@ class AsyncBookmarkService:
     async def delete(self, id: str) -> bool:
         data = await self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteBookmark", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Bookmark]:
+        return paginate_async(self.list, **filters)

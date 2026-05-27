@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import StreamConsumer, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _CONSUMER_FIELDS = """
     id streamId name cursorSequence createdAt updatedAt
@@ -96,6 +96,9 @@ class StreamConsumerService:
         data = self._t.execute(_ADVANCE_CURSOR_MUTATION, {"id": id, "sequence": sequence})
         return _parse_consumer(data["advanceConsumerCursor"])
 
+    def iterate(self, stream_id: str, **filters: Any) -> Iterator[StreamConsumer]:
+        return paginate(lambda **kw: self.list(stream_id, **kw), **filters)
+
 
 class AsyncStreamConsumerService:
     def __init__(self, transport: Any):
@@ -136,3 +139,6 @@ class AsyncStreamConsumerService:
     async def advance_cursor(self, id: str, sequence: int) -> StreamConsumer:
         data = await self._t.execute(_ADVANCE_CURSOR_MUTATION, {"id": id, "sequence": sequence})
         return _parse_consumer(data["advanceConsumerCursor"])
+
+    def iterate(self, stream_id: str, **filters: Any) -> AsyncIterator[StreamConsumer]:
+        return paginate_async(lambda **kw: self.list(stream_id, **kw), **filters)

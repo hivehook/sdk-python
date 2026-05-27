@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import User, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _USER_FIELDS = """
     id organizationId email name role lastLoginAt createdAt updatedAt
@@ -99,6 +99,9 @@ class UserService:
         data = self._t.execute(_UPDATE_ROLE_MUTATION, {"id": id, "input": inp})
         return _parse_user(data["updateUserRole"])
 
+    def iterate(self, **filters: Any) -> Iterator[User]:
+        return paginate(self.list, **filters)
+
 
 class AsyncUserService:
     def __init__(self, transport: Any):
@@ -142,3 +145,6 @@ class AsyncUserService:
         inp: dict[str, Any] = {"role": role}
         data = await self._t.execute(_UPDATE_ROLE_MUTATION, {"id": id, "input": inp})
         return _parse_user(data["updateUserRole"])
+
+    def iterate(self, **filters: Any) -> AsyncIterator[User]:
+        return paginate_async(self.list, **filters)

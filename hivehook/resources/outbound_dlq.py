@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import OutboundDLQEntry, ListResult, ReplayResult, PurgeResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _DLQ_FIELDS = "id deliveryId messageId lastError replayedAt createdAt"
 
@@ -79,6 +79,9 @@ class OutboundDLQService:
         data = self._t.execute(_PURGE_MUTATION, {"olderThan": older_than} if older_than else None)
         return PurgeResult(purged=data["purgeOutboundDlq"]["purged"])
 
+    def iterate(self, **filters: Any) -> Iterator[OutboundDLQEntry]:
+        return paginate(self.list, **filters)
+
 
 class AsyncOutboundDLQService:
     def __init__(self, transport: Any):
@@ -110,3 +113,6 @@ class AsyncOutboundDLQService:
     async def purge(self, older_than: str | None = None) -> PurgeResult:
         data = await self._t.execute(_PURGE_MUTATION, {"olderThan": older_than} if older_than else None)
         return PurgeResult(purged=data["purgeOutboundDlq"]["purged"])
+
+    def iterate(self, **filters: Any) -> AsyncIterator[OutboundDLQEntry]:
+        return paginate_async(self.list, **filters)

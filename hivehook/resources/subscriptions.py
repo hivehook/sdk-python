@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Subscription, ListResult, FilterConfig, TransformConfig, FilterRule, BodyMatchRule
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _SUB_FIELDS = """
     id name sourceId destinationId
@@ -195,6 +195,9 @@ class SubscriptionService:
         data = self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteSubscription", False)
 
+    def iterate(self, **filters: Any) -> Iterator[Subscription]:
+        return paginate(self.list, **filters)
+
 
 class AsyncSubscriptionService:
     def __init__(self, transport: Any):
@@ -260,3 +263,6 @@ class AsyncSubscriptionService:
     async def delete(self, id: str) -> bool:
         data = await self._t.execute(_DELETE_MUTATION, {"id": id})
         return data.get("deleteSubscription", False)
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Subscription]:
+        return paginate_async(self.list, **filters)

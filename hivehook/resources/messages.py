@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import base64
-from typing import Any
+from typing import Any, AsyncIterator, Iterator
 
 from hivehook.types import Message, ListResult
-from hivehook.resources._base import parse_page_info, build_list_vars
+from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _MSG_FIELDS = "id applicationId eventType payload idempotencyKey status createdAt"
 
@@ -87,6 +87,9 @@ class MessageService:
         data = self._t.execute(_SEND_MUTATION, {"input": inp})
         return _parse_message(data["sendMessage"])
 
+    def iterate(self, **filters: Any) -> Iterator[Message]:
+        return paginate(self.list, **filters)
+
 
 class AsyncMessageService:
     def __init__(self, transport: Any):
@@ -130,3 +133,6 @@ class AsyncMessageService:
             inp["idempotencyKey"] = idempotency_key
         data = await self._t.execute(_SEND_MUTATION, {"input": inp})
         return _parse_message(data["sendMessage"])
+
+    def iterate(self, **filters: Any) -> AsyncIterator[Message]:
+        return paginate_async(self.list, **filters)
