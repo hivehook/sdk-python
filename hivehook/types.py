@@ -599,3 +599,25 @@ class StreamSink:
     status: str = ""
     last_flushed_at: str | None = None
     created_at: str = ""
+
+
+@dataclass
+class StreamEntry:
+    id: str = ""
+    stream_id: str = ""
+    sequence: int = 0
+    message_id: str | None = None
+    event_type: str = ""
+    payload: str = ""
+    created_at: str = ""
+
+
+@dataclass
+class MetaEventConfig:
+    id: str = ""
+    name: str = ""
+    url: str = ""
+    signing_secret: str = ""
+    event_types: list[str] = field(default_factory=list)
+    enabled: bool = True
+    created_at: str = ""

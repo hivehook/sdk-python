@@ -14,6 +14,7 @@ from hivehook.resources import (
     StatusService, TransformationService, PortalService,
     StreamService, StreamConsumerService, StreamSinkService,
     OrganizationService, UserService, AuditLogService,
+    MetaEventConfigService,
 )
 
 
@@ -58,6 +59,7 @@ class HivehookClient:
         self.organizations = OrganizationService(t)
         self.users = UserService(t)
         self.audit_logs = AuditLogService(t)
+        self.meta_event_configs = MetaEventConfigService(t)
 
     def close(self) -> None:
         self._transport.close()

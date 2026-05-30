@@ -12,6 +12,7 @@ from hivehook.resources import (
     AsyncStatusService, AsyncTransformationService, AsyncPortalService,
     AsyncStreamService, AsyncStreamConsumerService, AsyncStreamSinkService,
     AsyncOrganizationService, AsyncUserService, AsyncAuditLogService,
+    AsyncMetaEventConfigService,
 )
 
 
@@ -56,6 +57,7 @@ class AsyncHivehookClient:
         self.organizations = AsyncOrganizationService(t)
         self.users = AsyncUserService(t)
         self.audit_logs = AsyncAuditLogService(t)
+        self.meta_event_configs = AsyncMetaEventConfigService(t)
 
     async def close(self) -> None:
         await self._transport.close()

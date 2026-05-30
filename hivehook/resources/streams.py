@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, AsyncIterator, Iterator
 
-from hivehook.types import Stream, ListResult
+from hivehook.types import Stream, StreamEntry, ListResult
 from hivehook.resources._base import parse_page_info, build_list_vars, paginate, paginate_async
 
 _STREAM_FIELDS = """
@@ -43,6 +43,29 @@ mutation DeleteStream($id: UUID!) {
   deleteStream(id: $id)
 }
 """
+
+_STREAM_ENTRY_FIELDS = "id streamId sequence messageId eventType payload createdAt"
+
+_LIST_ENTRIES_QUERY = """
+query ListStreamEntries($streamId: UUID!, $afterSequence: Int, $limit: Int) {
+  streamEntries(streamId: $streamId, afterSequence: $afterSequence, limit: $limit) {
+    nodes { %s }
+    pageInfo { total limit offset endCursor hasNextPage }
+  }
+}
+""" % _STREAM_ENTRY_FIELDS
+
+
+def _parse_stream_entry(data: dict[str, Any]) -> StreamEntry:
+    return StreamEntry(
+        id=data.get("id", ""),
+        stream_id=data.get("streamId", ""),
+        sequence=data.get("sequence", 0),
+        message_id=data.get("messageId"),
+        event_type=data.get("eventType", ""),
+        payload=data.get("payload", ""),
+        created_at=data.get("createdAt", ""),
+    )
 
 
 def _parse_stream(data: dict[str, Any]) -> Stream:
@@ -112,6 +135,21 @@ class StreamService:
     def iterate(self, **filters: Any) -> Iterator[Stream]:
         return paginate(self.list, **filters)
 
+    def entries(
+        self, stream_id: str, after_sequence: int | None = None, limit: int | None = None,
+    ) -> ListResult[StreamEntry]:
+        v: dict[str, Any] = {"streamId": stream_id}
+        if after_sequence is not None:
+            v["afterSequence"] = after_sequence
+        if limit is not None:
+            v["limit"] = limit
+        data = self._t.execute(_LIST_ENTRIES_QUERY, v)
+        conn = data["streamEntries"]
+        return ListResult(
+            nodes=[_parse_stream_entry(n) for n in conn["nodes"]],
+            page_info=parse_page_info(conn),
+        )
+
 
 class AsyncStreamService:
     def __init__(self, transport: Any):
@@ -168,3 +206,18 @@ class AsyncStreamService:
 
     def iterate(self, **filters: Any) -> AsyncIterator[Stream]:
         return paginate_async(self.list, **filters)
+
+    async def entries(
+        self, stream_id: str, after_sequence: int | None = None, limit: int | None = None,
+    ) -> ListResult[StreamEntry]:
+        v: dict[str, Any] = {"streamId": stream_id}
+        if after_sequence is not None:
+            v["afterSequence"] = after_sequence
+        if limit is not None:
+            v["limit"] = limit
+        data = await self._t.execute(_LIST_ENTRIES_QUERY, v)
+        conn = data["streamEntries"]
+        return ListResult(
+            nodes=[_parse_stream_entry(n) for n in conn["nodes"]],
+            page_info=parse_page_info(conn),
+        )

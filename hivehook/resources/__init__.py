@@ -22,6 +22,7 @@ from hivehook.resources.stream_sinks import StreamSinkService, AsyncStreamSinkSe
 from hivehook.resources.organizations import OrganizationService, AsyncOrganizationService
 from hivehook.resources.users import UserService, AsyncUserService
 from hivehook.resources.audit_logs import AuditLogService, AsyncAuditLogService
+from hivehook.resources.meta_event_configs import MetaEventConfigService, AsyncMetaEventConfigService
 
 __all__ = [
     "SourceService", "AsyncSourceService",
@@ -48,4 +49,5 @@ __all__ = [
     "OrganizationService", "AsyncOrganizationService",
     "UserService", "AsyncUserService",
     "AuditLogService", "AsyncAuditLogService",
+    "MetaEventConfigService", "AsyncMetaEventConfigService",
 ]
